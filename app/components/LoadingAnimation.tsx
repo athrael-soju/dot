@@ -33,14 +33,15 @@ class CustomCurve extends THREE.Curve<THREE.Vector3> {
 }
 
 interface LoadingAnimationProps {
-  autoplay?: boolean;
+  onAnimationComplete?: () => void;
 }
 
-export default function LoadingAnimation({ autoplay = false }: LoadingAnimationProps) {
+export default function LoadingAnimation({ onAnimationComplete }: LoadingAnimationProps) {
   const wrapRef = useRef<HTMLDivElement>(null);
   const animationFrameRef = useRef<number | undefined>(undefined);
-  const toendRef = useRef(autoplay);
   const completedRef = useRef(false);
+  const completionCallbackFiredRef = useRef(false);
+  const animationStartedRef = useRef(false);
 
   useEffect(() => {
     // Capture ref value to fix React hooks warning
@@ -125,20 +126,19 @@ export default function LoadingAnimation({ autoplay = false }: LoadingAnimationP
     canvas.style.transform = 'translate(-50%, -50%)';
     canvas.style.width = `${canvassize}px`;
     canvas.style.height = `${canvassize}px`;
+    canvas.style.cursor = 'default';
 
     currentWrap.appendChild(canvas);
 
-    // Event handlers
-    const start = () => {
-      toendRef.current = true;
-    };
-
-    const back = () => {
-      // Only allow reversing if animation hasn't completed
-      if (!completedRef.current) {
-        toendRef.current = false;
+    // Click handler to start animation
+    const handleCanvasClick = () => {
+      if (!animationStartedRef.current) {
+        animationStartedRef.current = true;
       }
     };
+
+    canvas.addEventListener('click', handleCanvasClick);
+    canvas.style.cursor = 'pointer';
 
     // Easing function
     const easing = (t: number, b: number, c: number, d: number) => {
@@ -150,14 +150,20 @@ export default function LoadingAnimation({ autoplay = false }: LoadingAnimationP
     const render = () => {
       let progress;
 
-      animatestep = Math.max(
-        0,
-        Math.min(240, toendRef.current ? animatestep + 1 : animatestep - 4)
-      );
+      // Only advance animation if started
+      if (animationStartedRef.current) {
+        animatestep = Math.max(0, Math.min(240, animatestep + 1));
+      }
 
       // Mark as completed when animation reaches the end
       if (animatestep >= 240) {
         completedRef.current = true;
+
+        // Auto-fire completion callback once
+        if (!completionCallbackFiredRef.current && onAnimationComplete) {
+          completionCallbackFiredRef.current = true;
+          onAnimationComplete();
+        }
       }
 
       acceleration = easing(animatestep, 0, 1, 240);
@@ -198,10 +204,6 @@ export default function LoadingAnimation({ autoplay = false }: LoadingAnimationP
     };
 
     // Add event listeners
-    document.body.addEventListener('mousedown', start, false);
-    document.body.addEventListener('touchstart', start, false);
-    document.body.addEventListener('mouseup', back, false);
-    document.body.addEventListener('touchend', back, false);
     window.addEventListener('resize', handleResize, false);
 
     // Cleanup
@@ -209,10 +211,7 @@ export default function LoadingAnimation({ autoplay = false }: LoadingAnimationP
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current);
       }
-      document.body.removeEventListener('mousedown', start);
-      document.body.removeEventListener('touchstart', start);
-      document.body.removeEventListener('mouseup', back);
-      document.body.removeEventListener('touchend', back);
+      canvas.removeEventListener('click', handleCanvasClick);
       window.removeEventListener('resize', handleResize);
 
       if (currentWrap && renderer.domElement) {
@@ -221,7 +220,7 @@ export default function LoadingAnimation({ autoplay = false }: LoadingAnimationP
 
       renderer.dispose();
     };
-  }, []);
+  }, [onAnimationComplete]);
 
   return (
     <div className="fixed inset-0 w-screen h-screen">
