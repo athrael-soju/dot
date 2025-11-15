@@ -46,19 +46,18 @@ export default function LoadingAnimation({ onAnimationComplete, isAgentConnected
   const animationStartedRef = useRef(false);
   const isAgentConnectedRef = useRef(false);
   const animateStepRef = useRef(0);
+  const isReversingRef = useRef(false);
 
   // Update ref when isAgentConnected changes
   useEffect(() => {
     isAgentConnectedRef.current = isAgentConnected || false;
   }, [isAgentConnected]);
 
-  // Handle reset
+  // Handle reset - trigger smooth reverse animation
   useEffect(() => {
     if (shouldReset) {
+      isReversingRef.current = true;
       animationStartedRef.current = false;
-      completedRef.current = false;
-      completionCallbackFiredRef.current = false;
-      animateStepRef.current = 0;
     }
   }, [shouldReset]);
 
@@ -174,8 +173,21 @@ export default function LoadingAnimation({ onAnimationComplete, isAgentConnected
     const render = () => {
       let progress;
 
-      // Only advance animation if started
-      if (animationStartedRef.current) {
+      // Handle reverse animation (smooth reset)
+      if (isReversingRef.current) {
+        // Reverse at 2x speed for quicker reset
+        const reverseSpeed = 2;
+        animateStepRef.current = Math.max(0, animateStepRef.current - reverseSpeed);
+
+        // Once fully reversed, complete the reset
+        if (animateStepRef.current === 0) {
+          isReversingRef.current = false;
+          completedRef.current = false;
+          completionCallbackFiredRef.current = false;
+        }
+      }
+      // Only advance animation if started and not reversing
+      else if (animationStartedRef.current) {
         // Pause at halfway (120 steps) until agent is connected
         const maxStep = isAgentConnectedRef.current ? 240 : 120;
         // Slower speed while waiting for agent, normal speed after connected
