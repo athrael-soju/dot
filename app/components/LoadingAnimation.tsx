@@ -32,10 +32,14 @@ class CustomCurve extends THREE.Curve<THREE.Vector3> {
   }
 }
 
-export default function LoadingAnimation() {
+interface LoadingAnimationProps {
+  autoplay?: boolean;
+}
+
+export default function LoadingAnimation({ autoplay = false }: LoadingAnimationProps) {
   const wrapRef = useRef<HTMLDivElement>(null);
   const animationFrameRef = useRef<number | undefined>(undefined);
-  const toendRef = useRef(false);
+  const toendRef = useRef(autoplay);
 
   useEffect(() => {
     // Capture ref value to fix React hooks warning
@@ -216,7 +220,7 @@ export default function LoadingAnimation() {
         className="absolute left-0 right-0 top-0 bottom-0 overflow-hidden"
       />
       <p className="absolute left-0 right-0 bottom-0 text-xs text-[#ccc] leading-8 text-center">
-        * Mouse or Finger press on the page to finish loading action.
+        * {autoplay ? 'Animation playing automatically. ' : ''}Mouse or Finger press on the page to {autoplay ? 'control' : 'finish'} loading action.
       </p>
     </div>
   );
