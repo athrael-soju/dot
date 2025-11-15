@@ -1,7 +1,11 @@
 import { RealtimeAgent } from '@openai/agents/realtime';
+import type { RealtimeSession } from '@openai/agents/realtime';
 
 // Function to create the agent with a disconnect callback
-export function createConversationalAgent(onDisconnect: () => void) {
+export function createConversationalAgent(
+  onDisconnect: () => void,
+  getSession: () => RealtimeSession | null
+) {
   return new RealtimeAgent({
     name: 'assistant',
     handoffDescription: 'A helpful AI assistant.',
@@ -28,10 +32,59 @@ export function createConversationalAgent(onDisconnect: () => void) {
           const args = JSON.parse(input);
           console.log('Ending session with farewell:', args.farewell_message);
 
-          // Delay disconnect to allow AI to respond
-          setTimeout(() => {
-            onDisconnect();
-          }, 500);
+          // Wait for the agent to finish speaking before disconnecting
+          const session = getSession();
+          if (session) {
+            // Track both agent response and audio completion
+            let agentDone = false;
+            let audioDone = false;
+            let disconnected = false;
+
+            const checkAndDisconnect = () => {
+              // Disconnect only when both agent finishes AND audio stops
+              if ((agentDone && audioDone) && !disconnected) {
+                disconnected = true;
+                // Small delay to ensure audio fully completes
+                setTimeout(() => {
+                  session.off('agent_end', onAgentEnd);
+                  session.off('audio_stopped', onAudioStopped);
+                  onDisconnect();
+                }, 1000);
+              }
+            };
+
+            const onAgentEnd = () => {
+              console.log('Agent response completed');
+              agentDone = true;
+              checkAndDisconnect();
+            };
+
+            const onAudioStopped = () => {
+              console.log('Audio playback stopped');
+              audioDone = true;
+              checkAndDisconnect();
+            };
+
+            // Listen for both agent completion and audio stopping
+            session.on('agent_end', onAgentEnd);
+            session.on('audio_stopped', onAudioStopped);
+
+            // Fallback timeout in case events don't fire (max 10 seconds)
+            setTimeout(() => {
+              if (!disconnected) {
+                console.log('Disconnect timeout reached, forcing disconnect');
+                session.off('agent_end', onAgentEnd);
+                session.off('audio_stopped', onAudioStopped);
+                disconnected = true;
+                onDisconnect();
+              }
+            }, 10000);
+          } else {
+            // Fallback if no session available
+            setTimeout(() => {
+              onDisconnect();
+            }, 500);
+          }
 
           return JSON.stringify({ success: true, message: 'Session ended successfully' });
         },

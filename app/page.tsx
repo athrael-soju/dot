@@ -88,8 +88,11 @@ export default function Home() {
         audioElement: audioElement,
       });
 
-      // Create the agent with disconnect callback
-      const agent = createConversationalAgent(handleDisconnect);
+      // Create the agent with disconnect callback and session getter
+      const agent = createConversationalAgent(
+        handleDisconnect,
+        () => sessionRef.current
+      );
 
       // Create RealtimeSession with the agent and transport
       const session = new RealtimeSession(agent, {
