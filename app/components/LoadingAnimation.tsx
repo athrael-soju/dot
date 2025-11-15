@@ -130,10 +130,11 @@ export default function LoadingAnimation({ onAnimationComplete, isAgentConnected
     // Renderer setup
     const renderer = new THREE.WebGLRenderer({
       antialias: true,
+      alpha: true, // Enable transparency
     });
     renderer.setPixelRatio(window.devicePixelRatio);
     renderer.setSize(canvassize, canvassize);
-    renderer.setClearColor('#d1684e');
+    renderer.setClearColor(0x000000, 0); // Transparent background
 
     // Style the canvas element
     const canvas = renderer.domElement;
@@ -147,21 +148,69 @@ export default function LoadingAnimation({ onAnimationComplete, isAgentConnected
 
     currentWrap.appendChild(canvas);
 
-    // Click handler to start animation
-    const handleCanvasClick = () => {
-      if (!animationStartedRef.current) {
-        animationStartedRef.current = true;
+    // Setup raycaster for precise click detection
+    const raycaster = new THREE.Raycaster();
+    const mouse = new THREE.Vector2();
 
-        // Fire the callback when animation starts
-        if (!completionCallbackFiredRef.current && onAnimationComplete) {
-          completionCallbackFiredRef.current = true;
-          onAnimationComplete();
+    // Increase raycaster threshold to detect clicks near the geometry
+    raycaster.params.Line = { threshold: 10 };
+    raycaster.params.Points = { threshold: 10 };
+
+    // Click handler to start animation - clicks within the animation area
+    const handleCanvasClick = (event: MouseEvent) => {
+      if (!animationStartedRef.current) {
+        // Get canvas bounding rectangle
+        const rect = canvas.getBoundingClientRect();
+
+        // Calculate click position relative to canvas center
+        const clickX = event.clientX - rect.left;
+        const clickY = event.clientY - rect.top;
+        const centerX = rect.width / 2;
+        const centerY = rect.height / 2;
+
+        // Calculate distance from center
+        const distanceFromCenter = Math.sqrt(
+          Math.pow(clickX - centerX, 2) + Math.pow(clickY - centerY, 2)
+        );
+
+        // Allow clicks within a reasonable radius around the animation (about 30% of canvas size)
+        const clickableRadius = Math.min(rect.width, rect.height) * 0.3;
+
+        // Only start animation if clicked within the animation area
+        if (distanceFromCenter <= clickableRadius) {
+          animationStartedRef.current = true;
+
+          // Fire the callback when animation starts
+          if (!completionCallbackFiredRef.current && onAnimationComplete) {
+            completionCallbackFiredRef.current = true;
+            onAnimationComplete();
+          }
         }
       }
     };
 
+    // Update cursor on mouse move to show when hovering over clickable area
+    const handleCanvasMouseMove = (event: MouseEvent) => {
+      const rect = canvas.getBoundingClientRect();
+
+      // Calculate mouse position relative to canvas center
+      const mouseX = event.clientX - rect.left;
+      const mouseY = event.clientY - rect.top;
+      const centerX = rect.width / 2;
+      const centerY = rect.height / 2;
+
+      // Calculate distance from center
+      const distanceFromCenter = Math.sqrt(
+        Math.pow(mouseX - centerX, 2) + Math.pow(mouseY - centerY, 2)
+      );
+
+      // Show pointer cursor within the clickable radius
+      const clickableRadius = Math.min(rect.width, rect.height) * 0.3;
+      canvas.style.cursor = distanceFromCenter <= clickableRadius ? 'pointer' : 'default';
+    };
+
     canvas.addEventListener('click', handleCanvasClick);
-    canvas.style.cursor = 'pointer';
+    canvas.addEventListener('mousemove', handleCanvasMouseMove);
 
     // Easing function
     const easing = (t: number, b: number, c: number, d: number) => {
@@ -254,6 +303,7 @@ export default function LoadingAnimation({ onAnimationComplete, isAgentConnected
         cancelAnimationFrame(animationFrameRef.current);
       }
       canvas.removeEventListener('click', handleCanvasClick);
+      canvas.removeEventListener('mousemove', handleCanvasMouseMove);
       window.removeEventListener('resize', handleResize);
 
       if (currentWrap && renderer.domElement) {
@@ -265,7 +315,7 @@ export default function LoadingAnimation({ onAnimationComplete, isAgentConnected
   }, [onAnimationComplete]);
 
   return (
-    <div className="fixed inset-0 w-screen h-screen">
+    <div className="fixed inset-0 w-screen h-screen" style={{ backgroundColor: '#d1684e' }}>
       <div
         ref={wrapRef}
         className="absolute left-0 right-0 top-0 bottom-0 overflow-hidden"

@@ -4,7 +4,7 @@ import { RealtimeAgent } from '@openai/agents/realtime';
 export function createConversationalAgent(onDisconnect: () => void) {
   return new RealtimeAgent({
     name: 'assistant',
-    handoffDescription: 'A helpful AI assistant',
+    handoffDescription: 'A helpful AI assistant.',
     instructions:
       'You are a friendly and helpful AI assistant. Engage in natural conversation with the user. Be concise but warm in your responses. When the user indicates they want to end the conversation or says goodbye, use the end_session tool to properly disconnect.',
     tools: [
@@ -31,7 +31,7 @@ export function createConversationalAgent(onDisconnect: () => void) {
           // Delay disconnect to allow AI to respond
           setTimeout(() => {
             onDisconnect();
-          }, 2000);
+          }, 500);
 
           return JSON.stringify({ success: true, message: 'Session ended successfully' });
         },
