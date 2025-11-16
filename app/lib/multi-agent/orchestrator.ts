@@ -28,21 +28,18 @@ export class MultiAgentOrchestrator {
   private responseAgent: RealtimeAgent | null = null;
   private state: PipelineState;
   private config: MultiAgentConfig;
-  private apiKey: string;
 
-  constructor(apiKey: string, config: Partial<MultiAgentConfig> = {}) {
-    this.apiKey = apiKey;
+  constructor(config: Partial<MultiAgentConfig> = {}) {
     this.config = { ...DEFAULT_CONFIG, ...config };
 
-    // Initialize text-based agents
-    this.routerAgent = new RouterAgent(apiKey);
+    // Initialize text-based agents (they retrieve API key from environment)
+    this.routerAgent = new RouterAgent();
     this.toolExecutorAgent = new ToolExecutorAgent(
-      apiKey,
       'gpt-4o-mini',
       this.config.maxToolExecutionTime,
       this.config.enableParallelToolExecution
     );
-    this.contextBuilderAgent = new ContextBuilderAgent(apiKey);
+    this.contextBuilderAgent = new ContextBuilderAgent();
 
     // Initialize pipeline state
     this.state = {

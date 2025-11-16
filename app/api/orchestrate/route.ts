@@ -20,9 +20,8 @@ function cleanupOldSessions() {
 
 export async function POST(request: NextRequest) {
   try {
-    const apiKey = process.env.OPENAI_API_KEY;
-
-    if (!apiKey) {
+    // Verify API key is configured (agents will retrieve it from env)
+    if (!process.env.OPENAI_API_KEY) {
       return NextResponse.json(
         { error: 'OPENAI_API_KEY not configured' },
         { status: 500 }
@@ -50,7 +49,7 @@ export async function POST(request: NextRequest) {
     switch (action) {
       case 'initialize': {
         // Create new orchestrator for this session
-        const orchestrator = new MultiAgentOrchestrator(apiKey, {
+        const orchestrator = new MultiAgentOrchestrator({
           debugMode,
           enableParallelToolExecution: true,
           maxToolExecutionTime: 30000,
@@ -81,7 +80,7 @@ export async function POST(request: NextRequest) {
 
         // Auto-initialize if not exists
         if (!orchestrator) {
-          orchestrator = new MultiAgentOrchestrator(apiKey, {
+          orchestrator = new MultiAgentOrchestrator({
             debugMode,
             enableParallelToolExecution: true,
             maxToolExecutionTime: 30000,

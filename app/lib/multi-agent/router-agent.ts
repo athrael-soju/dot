@@ -37,7 +37,11 @@ export class RouterAgent {
   private client: OpenAI;
   private model: string;
 
-  constructor(apiKey: string, model: string = 'gpt-4o-mini') {
+  constructor(model: string = 'gpt-4o-mini') {
+    const apiKey = process.env.OPENAI_API_KEY;
+    if (!apiKey) {
+      throw new Error('OPENAI_API_KEY environment variable is not set');
+    }
     this.client = new OpenAI({ apiKey });
     this.model = model;
   }
