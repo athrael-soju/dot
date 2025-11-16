@@ -22,7 +22,6 @@ export async function POST() {
         },
         body: JSON.stringify({
           model: 'gpt-realtime-mini',
-          voice: 'verse',
         }),
       }
     );
