@@ -73,18 +73,20 @@ Current User Message:
 Analyze this message and provide your routing decision.`;
 
     try {
-      const response = await this.client.chat.completions.create({
+      const response = await this.client.responses.create({
         model: this.model,
-        messages: [
-          { role: 'system', content: ROUTER_SYSTEM_PROMPT },
-          { role: 'user', content: userPrompt }
-        ],
+        instructions: ROUTER_SYSTEM_PROMPT,
+        input: userPrompt,
         temperature: 0.3, // Lower temperature for more consistent classification
-        max_tokens: 500,
-        response_format: { type: 'json_object' }
+        max_output_tokens: 500,
+        text: {
+          format: {
+            type: 'json_object'
+          }
+        }
       });
 
-      const content = response.choices[0].message.content;
+      const content = response.output_text;
       if (!content) {
         throw new Error('Empty response from Router Agent');
       }

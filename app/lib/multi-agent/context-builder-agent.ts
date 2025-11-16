@@ -85,18 +85,20 @@ ${historyContext || 'No previous history'}
 Analyze these results and create a formatted context for the Response Agent.`;
 
     try {
-      const response = await this.client.chat.completions.create({
+      const response = await this.client.responses.create({
         model: this.model,
-        messages: [
-          { role: 'system', content: CONTEXT_BUILDER_SYSTEM_PROMPT },
-          { role: 'user', content: userPrompt }
-        ],
+        instructions: CONTEXT_BUILDER_SYSTEM_PROMPT,
+        input: userPrompt,
         temperature: 0.4,
-        max_tokens: 1500,
-        response_format: { type: 'json_object' }
+        max_output_tokens: 1500,
+        text: {
+          format: {
+            type: 'json_object'
+          }
+        }
       });
 
-      const content = response.choices[0].message.content;
+      const content = response.output_text;
       if (!content) {
         throw new Error('Empty response from Context Builder Agent');
       }

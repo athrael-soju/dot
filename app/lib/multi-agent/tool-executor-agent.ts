@@ -116,18 +116,20 @@ User message: "${userMessage}"
 Determine the parameters for each tool.`;
 
     try {
-      const response = await this.client.chat.completions.create({
+      const response = await this.client.responses.create({
         model: this.model,
-        messages: [
-          { role: 'system', content: EXECUTOR_SYSTEM_PROMPT },
-          { role: 'user', content: userPrompt }
-        ],
+        instructions: EXECUTOR_SYSTEM_PROMPT,
+        input: userPrompt,
         temperature: 0.2,
-        max_tokens: 1000,
-        response_format: { type: 'json_object' }
+        max_output_tokens: 1000,
+        text: {
+          format: {
+            type: 'json_object'
+          }
+        }
       });
 
-      const content = response.choices[0].message.content;
+      const content = response.output_text;
       if (!content) {
         throw new Error('Empty response from Tool Executor Agent');
       }
