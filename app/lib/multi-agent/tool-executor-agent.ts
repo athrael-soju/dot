@@ -39,7 +39,7 @@ export class ToolExecutorAgent {
       throw new Error('OPENAI_API_KEY environment variable is not set');
     }
     this.client = new OpenAI({ apiKey });
-    this.model = process.env.OPENAI_MODEL || 'gpt-4o-mini';
+    this.model = process.env.OPENAI_MODEL || 'gpt-realtime-mini';
     this.toolRegistry = new Map();
     this.maxExecutionTime = maxExecutionTime;
     this.enableParallel = enableParallel;

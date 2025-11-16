@@ -21,7 +21,7 @@ export async function POST() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          model: 'gpt-realtime-mini',
+          model: process.env.OPENAI_MODEL || 'gpt-realtime-mini',
         }),
       }
     );
