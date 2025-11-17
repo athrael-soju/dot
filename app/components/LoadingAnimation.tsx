@@ -131,10 +131,11 @@ export default function LoadingAnimation({ onAnimationComplete, isAgentConnected
     const renderer = new THREE.WebGLRenderer({
       antialias: true,
       alpha: true, // Enable transparency
+
     });
     renderer.setPixelRatio(window.devicePixelRatio);
     renderer.setSize(canvassize, canvassize);
-    renderer.setClearColor(0x000000, 0); // Transparent background
+    renderer.setClearColor(0x000000, 0);
 
     // Style the canvas element
     const canvas = renderer.domElement;
@@ -148,36 +149,35 @@ export default function LoadingAnimation({ onAnimationComplete, isAgentConnected
 
     currentWrap.appendChild(canvas);
 
-    // Setup raycaster for precise click detection
+    // Raycaster for detecting clicks on the animation
     const raycaster = new THREE.Raycaster();
     const mouse = new THREE.Vector2();
 
-    // Increase raycaster threshold to detect clicks near the geometry
-    raycaster.params.Line = { threshold: 10 };
-    raycaster.params.Points = { threshold: 10 };
+    // Create an invisible clickable area that matches the geometry dimensions
+    // The tube extends along x-axis with length=30 (so -30 to +30) and radius=5.6 for y/z
+    // Using CapsuleGeometry (cylinder with rounded ends) rotated to align with x-axis
+    const clickableArea = new THREE.Mesh(
+      new THREE.CapsuleGeometry(radius * 1.5, length * 1.5),
+      new THREE.MeshBasicMaterial({ visible: false })
+    );
+    clickableArea.rotation.z = Math.PI / 2; // Rotate to align with x-axis
+    group.add(clickableArea);
 
-    // Click handler to start animation - clicks within the animation area
+    // Click handler to start animation - only when clicking on the mesh or its interior
     const handleCanvasClick = (event: MouseEvent) => {
       if (!animationStartedRef.current) {
-        // Get canvas bounding rectangle
+        // Calculate mouse position in normalized device coordinates (-1 to +1)
         const rect = canvas.getBoundingClientRect();
+        mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+        mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
 
-        // Calculate click position relative to canvas center
-        const clickX = event.clientX - rect.left;
-        const clickY = event.clientY - rect.top;
-        const centerX = rect.width / 2;
-        const centerY = rect.height / 2;
+        // Update the raycaster with the camera and mouse position
+        raycaster.setFromCamera(mouse, camera);
 
-        // Calculate distance from center
-        const distanceFromCenter = Math.sqrt(
-          Math.pow(clickX - centerX, 2) + Math.pow(clickY - centerY, 2)
-        );
+        // Check for intersections with the mesh, ring, ringcover, or clickable area
+        const intersects = raycaster.intersectObjects([mesh, ring, ringcover, clickableArea]);
 
-        // Allow clicks within a reasonable radius around the animation (about 30% of canvas size)
-        const clickableRadius = Math.min(rect.width, rect.height) * 0.3;
-
-        // Only start animation if clicked within the animation area
-        if (distanceFromCenter <= clickableRadius) {
+        if (intersects.length > 0) {
           animationStartedRef.current = true;
 
           // Fire the callback when animation starts
@@ -189,28 +189,25 @@ export default function LoadingAnimation({ onAnimationComplete, isAgentConnected
       }
     };
 
-    // Update cursor on mouse move to show when hovering over clickable area
-    const handleCanvasMouseMove = (event: MouseEvent) => {
-      const rect = canvas.getBoundingClientRect();
+    canvas.addEventListener('click', handleCanvasClick);
 
-      // Calculate mouse position relative to canvas center
-      const mouseX = event.clientX - rect.left;
-      const mouseY = event.clientY - rect.top;
-      const centerX = rect.width / 2;
-      const centerY = rect.height / 2;
+    // Mouse move handler to show pointer cursor only when hovering over the mesh or its interior
+    const handleMouseMove = (event: MouseEvent) => {
+      if (!animationStartedRef.current) {
+        const rect = canvas.getBoundingClientRect();
+        mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+        mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
 
-      // Calculate distance from center
-      const distanceFromCenter = Math.sqrt(
-        Math.pow(mouseX - centerX, 2) + Math.pow(mouseY - centerY, 2)
-      );
+        raycaster.setFromCamera(mouse, camera);
+        const intersects = raycaster.intersectObjects([mesh, ring, ringcover, clickableArea]);
 
-      // Show pointer cursor within the clickable radius
-      const clickableRadius = Math.min(rect.width, rect.height) * 0.3;
-      canvas.style.cursor = distanceFromCenter <= clickableRadius ? 'pointer' : 'default';
+        canvas.style.cursor = intersects.length > 0 ? 'pointer' : 'default';
+      } else {
+        canvas.style.cursor = 'default';
+      }
     };
 
-    canvas.addEventListener('click', handleCanvasClick);
-    canvas.addEventListener('mousemove', handleCanvasMouseMove);
+    canvas.addEventListener('mousemove', handleMouseMove);
 
     // Easing function
     const easing = (t: number, b: number, c: number, d: number) => {
@@ -303,7 +300,7 @@ export default function LoadingAnimation({ onAnimationComplete, isAgentConnected
         cancelAnimationFrame(animationFrameRef.current);
       }
       canvas.removeEventListener('click', handleCanvasClick);
-      canvas.removeEventListener('mousemove', handleCanvasMouseMove);
+      canvas.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('resize', handleResize);
 
       if (currentWrap && renderer.domElement) {
@@ -315,7 +312,7 @@ export default function LoadingAnimation({ onAnimationComplete, isAgentConnected
   }, [onAnimationComplete]);
 
   return (
-    <div className="fixed inset-0 w-screen h-screen" style={{ backgroundColor: '#d1684e' }}>
+    <div className="fixed inset-0 w-screen h-screen">
       <div
         ref={wrapRef}
         className="absolute left-0 right-0 top-0 bottom-0 overflow-hidden"
