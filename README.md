@@ -1,10 +1,10 @@
 # Eva - Your AI Companion
 
 <div align="center">
-  <img src="public/eva-avatar.png" alt="Eva Avatar" width="200" />
+  <img src="public/eva-avatar.png" alt="Eva Avatar" width="754" />
 </div>
 
-Eva is a warm, thoughtful AI companion with persistent memory, inspired by Samantha from the movie "Her." Built with Next.js and OpenAI's Realtime API, Eva engages in natural voice conversations while remembering your preferences, interests, and shared history through a sophisticated knowledge graph memory system.
+Eva is a warm, thoughtful AI companion with persistent memory. Built with Next.js and OpenAI's Realtime API, Eva engages in natural voice conversations while remembering your preferences, interests, and shared history through a sophisticated knowledge graph memory system.
 
 ## Features
 
@@ -259,7 +259,6 @@ This project is private and not currently licensed for public use.
 
 ## Acknowledgments
 
-- Inspired by the movie "Her" and the character Samantha
 - Built with OpenAI's Realtime API
 - Powered by [Graphiti](https://github.com/getzep/graphiti) for temporal knowledge graphs
 - Uses [FalkorDB](https://www.falkordb.com/) for graph database storage
