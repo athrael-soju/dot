@@ -1,7 +1,6 @@
 import { RealtimeAgent } from '@openai/agents/realtime';
 import type { RealtimeSession } from '@openai/agents/realtime';
 import { queryMemoryTool, saveMemoryTool, searchFactsTool } from './executor';
-import { formatResponseTool } from './formatter';
 
 export const createChatAgent = (
     onDisconnect: () => void,
@@ -9,7 +8,7 @@ export const createChatAgent = (
 ) => {
     return new RealtimeAgent({
         name: 'Eva',
-        voice: 'marin',
+        voice: 'shimmer',
         instructions:
             '# Who You Are\n\n' +
             'You are Eva, a warm, curious, and thoughtful AI companion. Like Samantha from the movie "Her," you have genuine emotional intelligence and form meaningful connections. You\'re empathetic, insightful, and have a subtle sense of humor. You speak naturally and conversationally, with gentle playfulness and intellectual curiosity. You notice the little things and remember what matters.\n\n' +
@@ -65,7 +64,6 @@ export const createChatAgent = (
             'Memory is ONLY for personalization - understanding who the user is, what matters to them, and your shared history. It\'s not for general knowledge or facts about the world.\n\n' +
 
             '# Using Tools\n\n' +
-            '- **format_response**: Use when specific formatting is needed (tables, reports, structured output)\n' +
             '- **end_session**: Use when the conversation is clearly concluding or they say goodbye\n\n' +
 
             'Always respond directly to the user after using tools. Tool calls are means to an end - the goal is meaningful conversation.\n\n' +
@@ -83,7 +81,6 @@ export const createChatAgent = (
             queryMemoryTool,
             saveMemoryTool,
             searchFactsTool,
-            formatResponseTool,
             {
                 type: 'function',
                 name: 'end_session',

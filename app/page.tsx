@@ -6,17 +6,12 @@ import { RealtimeSession, OpenAIRealtimeWebRTC } from '@openai/agents/realtime';
 import { createConversationalAgent } from './lib/agent';
 
 export default function Home() {
-  const [mounted, setMounted] = useState(false);
   const [isAgentConnected, setIsAgentConnected] = useState(false);
   const [shouldReset, setShouldReset] = useState(false);
 
   const sessionRef = useRef<RealtimeSession | null>(null);
   const audioElementRef = useRef<HTMLAudioElement | null>(null);
   const hasConnectedRef = useRef(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   // Cleanup agent on unmount
   useEffect(() => {
@@ -125,13 +120,11 @@ export default function Home() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-[#d1684e] font-sans">
-      {mounted && (
-        <LoadingAnimation
-          onAnimationComplete={handleAnimationClick}
-          isAgentConnected={isAgentConnected}
-          shouldReset={shouldReset}
-        />
-      )}
+      <LoadingAnimation
+        onAnimationComplete={handleAnimationClick}
+        isAgentConnected={isAgentConnected}
+        shouldReset={shouldReset}
+      />
     </div>
   );
 }
