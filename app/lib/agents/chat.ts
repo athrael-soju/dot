@@ -104,8 +104,11 @@ export const createChatAgent = (
 
                     const session = getSession();
                     if (session) {
+                        let fallbackTimeout: NodeJS.Timeout;
+
                         // Wait for the agent to finish its turn (generation)
                         const onAgentEnd = async () => {
+                            if (fallbackTimeout) clearTimeout(fallbackTimeout);
                             console.log('Agent response completed, waiting for audio playback...');
                             session.off('agent_end', onAgentEnd);
 
@@ -119,7 +122,7 @@ export const createChatAgent = (
                         session.on('agent_end', onAgentEnd);
 
                         // Fallback timeout in case agent_end never fires or something gets stuck
-                        setTimeout(() => {
+                        fallbackTimeout = setTimeout(() => {
                             console.log('Disconnect timeout reached, forcing disconnect');
                             session.off('agent_end', onAgentEnd);
                             onDisconnect();

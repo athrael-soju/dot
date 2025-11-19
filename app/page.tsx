@@ -114,8 +114,29 @@ export default function Home() {
             let silenceStart = Date.now();
             const SILENCE_THRESHOLD = 10; // Low threshold for silence (0-255)
             const SILENCE_DURATION = 1000; // 1 second of silence to confirm end
+            let timeoutId: NodeJS.Timeout;
+            let isCleanedUp = false;
+
+            const cleanup = () => {
+              if (isCleanedUp) return;
+              isCleanedUp = true;
+
+              if (timeoutId) clearTimeout(timeoutId);
+
+              try {
+                source.disconnect();
+                analyser.disconnect();
+                if (audioContext.state !== 'closed') {
+                  audioContext.close();
+                }
+              } catch (e) {
+                console.warn('Error during audio cleanup:', e);
+              }
+            };
 
             const checkSilence = () => {
+              if (isCleanedUp) return;
+
               analyser.getByteFrequencyData(dataArray);
 
               // Calculate average volume
@@ -142,17 +163,11 @@ export default function Home() {
               }
             };
 
-            const cleanup = () => {
-              source.disconnect();
-              analyser.disconnect();
-              audioContext.close();
-            };
-
             // Start checking
             checkSilence();
 
             // Safety timeout (max 10 seconds)
-            setTimeout(() => {
+            timeoutId = setTimeout(() => {
               cleanup();
               resolve();
             }, 10000);
