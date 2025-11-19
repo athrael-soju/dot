@@ -1,7 +1,7 @@
 # Eva - Your AI Companion
 
 <div align="center">
-  <img src="public/eva-avatar.png" alt="Eva Avatar" width="754" />
+  <img src="public/eva-avatar.png" alt="Eva Avatar" width="754" height="643" />
 </div>
 
 Eva is a warm, thoughtful AI companion with persistent memory. Built with Next.js and OpenAI's Realtime API, Eva engages in natural voice conversations while remembering your preferences, interests, and shared history through a sophisticated knowledge graph memory system.
