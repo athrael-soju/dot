@@ -52,66 +52,13 @@ graph TB
     style Neo4j fill:#f3e5f5
 ```
 
-## 🔄 Memory System Flow
+## 🔄 How Memory Works
 
-```mermaid
-sequenceDiagram
-    participant User
-    participant Plucky (Agent)
-    participant Browser
-    participant API Routes
-    participant MCP Client
-    participant Graphiti
-    participant Neo4j
+**On Startup:** Plucky retrieves recent conversation history and user profile from the knowledge graph.
 
-    Note over Plucky,Neo4j: Startup: Load Context
-    Plucky->>Browser: Call get_episodes tool
-    Browser->>API Routes: POST /api/memory/get-episodes
-    API Routes->>MCP Client: callTool('get_episodes')
-    MCP Client->>Graphiti: JSON-RPC: get_episodes
-    Graphiti->>Neo4j: MATCH episodes
-    Neo4j-->>Graphiti: Episode nodes
-    Graphiti-->>MCP Client: Episodes JSON
-    MCP Client-->>API Routes: Result
-    API Routes-->>Browser: Episodes
-    Browser-->>Plucky: Tool result (recent history)
+**During Conversation:** When you share information, Plucky saves it as episodes with entities (people, preferences, events) and relationships.
 
-    Plucky->>Browser: Call search_nodes tool
-    Browser->>API Routes: POST /api/memory/search-nodes
-    API Routes->>MCP Client: callTool('search_nodes')
-    MCP Client->>Graphiti: JSON-RPC: search_nodes
-    Graphiti->>Neo4j: Vector search + MATCH
-    Neo4j-->>Graphiti: Entity nodes
-    Graphiti-->>MCP Client: Entities JSON
-    MCP Client-->>API Routes: Result
-    API Routes-->>Browser: Entities
-    Browser-->>Plucky: Tool result (user profile)
-
-    Note over User,Plucky: Conversation
-    User->>Plucky: "Hi, I'm Bob"
-    Plucky->>Browser: Call add_episode tool
-    Browser->>API Routes: POST /api/memory/add-episode
-    API Routes->>MCP Client: callTool('add_memory')
-    MCP Client->>Graphiti: JSON-RPC: add_memory
-    Graphiti->>Neo4j: CREATE nodes + edges
-    Neo4j-->>Graphiti: Success
-    Graphiti-->>MCP Client: Episode UUID
-    MCP Client-->>API Routes: Result
-    API Routes-->>Browser: Success
-    Browser-->>Plucky: Memory saved
-    Plucky->>User: "Nice to meet you, Bob!"
-
-    Note over User,Plucky: Future Session
-    User->>Plucky: "What's my name?"
-    Plucky->>Browser: Call search_nodes tool
-    Browser->>API Routes: POST /api/memory/search-nodes
-    API Routes->>MCP Client: callTool('search_nodes')
-    MCP Client->>Graphiti: query="user name"
-    Graphiti->>Neo4j: Vector search
-    Neo4j-->>Graphiti: Bob entity
-    Graphiti-->>Plucky: "Bob" found
-    Plucky->>User: "Your name is Bob"
-```
+**Future Sessions:** Plucky searches the graph semantically to recall relevant information naturally.
 
 ## 🛠️ Technology Stack
 
@@ -137,29 +84,16 @@ sequenceDiagram
 ```
 Plucky/
 ├── app/
-│   ├── api/                      # Backend API routes
+│   ├── api/
 │   │   ├── memory/              # Memory operation endpoints
-│   │   │   ├── add-episode/     # Save new memory
-│   │   │   ├── search-nodes/    # Search entities
-│   │   │   ├── search-facts/    # Search relationships
-│   │   │   ├── get-episodes/    # Get recent history
-│   │   │   ├── delete-episode/  # Delete specific memory
-│   │   │   ├── delete-entity-edge/ # Delete relationship
-│   │   │   └── forget/          # Clear all memories
 │   │   └── session/             # OpenAI session tokens
 │   ├── lib/
-│   │   ├── agents/
-│   │   │   ├── chat.ts          # Main Plucky agent configuration
-│   │   │   ├── persona.ts       # Personality & behavior instructions
-│   │   │   ├── executor.ts      # Memory tool definitions
-│   │   │   └── tools/           # Additional agent tools
-│   │   ├── client.ts            # MCP client (server-side only)
-│   │   ├── memory.ts            # Memory type definitions
+│   │   ├── agents/              # Agent configuration & tools
+│   │   ├── client.ts            # MCP client (server-side)
 │   │   └── services/            # Service layer
 │   ├── components/              # React components
-│   └── page.tsx                 # Main application entry
-├── docker-compose.yml           # Graphiti + Neo4j services
-└── next.config.ts              # Next.js configuration
+│   └── page.tsx                 # Main entry point
+└── docker-compose.yml           # Graphiti + Neo4j services
 ```
 
 ## 🚀 Getting Started
@@ -208,115 +142,38 @@ Plucky/
 
 ## 💡 How to Use
 
-### Starting a Conversation
+1. **Connect** - Click the connect button and allow microphone access
+2. **Wait for greeting** - Plucky retrieves her memories about you first
+3. **Start talking** - Speak naturally, she responds in real-time
 
-1. **Connect** - Click the loading animation or press the connect button
-2. **Allow microphone access** when prompted
-3. **Wait for Plucky to greet you** - She'll retrieve her memories about you first
-4. **Start talking** - Speak naturally, Plucky will respond in real-time
+### What Plucky Remembers
 
-### Memory Features
+- ✅ Personal details (name, role, location)
+- ✅ Preferences and opinions
+- ✅ Topics of interest
+- ✅ Past events and conversations
+- ✅ Goals and commitments
 
-Plucky automatically remembers:
-- ✅ **Personal details** - Your name, role, location, organization
-- ✅ **Preferences** - Likes, dislikes, opinions
-- ✅ **Topics of interest** - What you care about
-- ✅ **Past events** - Important moments from conversations
-- ✅ **Goals & requirements** - Your objectives and commitments
+**Ask about memories:** *"What do you know about me?"* or *"Do you remember what we talked about?"*
 
-### Asking Plucky to Remember
+**Clear memories:** *"Forget everything"* (requires confirmation)
 
-```
-"What do you know about me?"
-"What's my name?"
-"Do you remember what we talked about?"
-"What are my preferences?"
-```
+**Debug mode:** Click ⚙️ to view transcripts, events, and controls
 
-### Managing Memories
+## 🔐 Security
 
-**Forget Everything:**
-```
-"Forget everything"
-"Clear all memories"
-```
-Plucky will ask for confirmation before permanently deleting all memories.
+- **Client-Side Audio:** Direct browser-to-OpenAI connection with ephemeral tokens (low latency, no key exposure)
+- **Server-Side Memory:** All database operations through backend API (credentials never exposed)
+- **Protected Access:** API keys and MCP credentials stay server-side
 
-### Debug Mode
+## 🧠 Memory System
 
-Click the gear icon (⚙️) in the top-right to toggle debug mode:
-- **Transcript** - See conversation history
-- **Events** - View system events and tool calls
-- **Controls** - Manual connection, PTT mode, codec selection
+Plucky uses a knowledge graph with three layers:
+- **Episodes:** Conversation memories with timestamps
+- **Entities:** People, preferences, topics, events, locations, etc.
+- **Facts:** Relationships between entities (PREFERS, WORKS_AT, RELATES_TO, etc.)
 
-## 🔐 Security Architecture
-
-### Ephemeral Token Pattern (Client-Side Realtime)
-```
-Browser ──[Request Token]──> Backend ──[Generate]──> OpenAI
-Browser ──[Connect with Token]──────────────────────> OpenAI
-        ⬆ Low latency, no API key exposure
-```
-
-### Memory Operations (Server-Side Only)
-```
-Browser ──[Tool Call]──> API Route ──[MCP Client]──> Graphiti
-        ⬆ Secure                    ⬆ Server-side only
-```
-
-**Security Benefits:**
-- ✅ OpenAI API key never exposed to browser
-- ✅ MCP credentials stay server-side
-- ✅ Graph database access fully protected
-- ✅ Low-latency audio (direct browser-to-OpenAI)
-
-## 🧠 Memory System Details
-
-### Knowledge Graph Structure
-
-```
-Episodes (Episodic Memory)
-    ↓
-Entities (Nodes)
-    - Person
-    - Preference
-    - Topic
-    - Event
-    - Location
-    - Organization
-    - Document
-    - Requirement
-    - Procedure
-    ↓
-Facts (Relationships/Edges)
-    - RELATES_TO
-    - MENTIONS
-    - PREFERS
-    - WORKS_AT
-    - etc.
-```
-
-### Memory Retrieval Strategy
-
-**Startup (Broad Context):**
-- `get_episodes(max=15)` - Recent conversation history
-- `search_nodes(query="user preferences personal information goals")` - User profile
-
-**During Conversation (Targeted):**
-- Specific queries based on user questions
-- Fresh searches even with cached context
-- Semantic search for best relevance
-
-### Session Linking
-
-Each conversation session is tracked:
-```
-Session_2025-11-21T16-58-46-211Z_840914cd
-    ↓ [MENTIONS]
-Episodes saved during this session
-    ↓ [EXTRACTS]
-Entities & Facts
-```
+Memories are retrieved through semantic search, providing relevant context for natural conversations.
 
 ## 🎨 Agent Personality
 
@@ -339,87 +196,31 @@ Plucky is designed to be:
 
 ## 🛠️ Development
 
-### Available Scripts
-
 ```bash
 npm run dev          # Start development server
 npm run build        # Build for production
-npm run start        # Start production server
 npm run lint         # Run ESLint
 npm run type-check   # TypeScript type checking
 ```
 
-### Adding New Memory Tools
-
-1. **Define tool in `app/lib/agents/executor.ts`**
-2. **Create API route in `app/api/memory/[tool-name]/route.ts`**
-3. **Add tool to agent in `app/lib/agents/chat.ts`**
-4. **Update instructions in `app/lib/agents/persona.ts`**
-
-Example tool structure:
-```typescript
-export const myNewTool = {
-    type: 'function' as const,
-    name: 'my_tool',
-    description: 'What this tool does',
-    parameters: { /* JSON schema */ },
-    invoke: async (_context, input) => {
-        // Call API route
-        const response = await fetch('/api/memory/my-tool', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(JSON.parse(input))
-        });
-        return JSON.stringify(await response.json());
-    }
-};
-```
-
 ## 🐛 Troubleshooting
 
-### MCP Connection Issues
-```bash
-# Check Graphiti is running
-docker ps | grep graphiti
+**MCP Connection:** Check `docker ps` and `docker logs plucky-graphiti-mcp-1`, restart with `docker compose restart`
 
-# View Graphiti logs
-docker logs plucky-graphiti-mcp-1
+**Memory Issues:** Verify Neo4j is running, check browser console for API errors
 
-# Restart services
-docker compose restart
-```
-
-### Memory Not Persisting
-- Check Neo4j is running: `docker ps | grep neo4j`
-- Verify `group_id="user_default"` is used consistently
-- Check browser console for API errors
-
-### Audio Issues
-- Ensure microphone permissions are granted
-- Check browser supports Web Audio API
-- Verify OpenAI API key has Realtime API access
+**Audio Issues:** Ensure microphone permissions granted and OpenAI API key has Realtime API access
 
 ## 📊 Monitoring
 
-### View Knowledge Graph
-Neo4j Browser: [http://localhost:7474](http://localhost:7474)
+**Neo4j Browser:** [http://localhost:7474](http://localhost:7474) (username: `neo4j`, password: `demodemo`)
 
-**Default credentials:**
-- Username: `neo4j`
-- Password: `demodemo`
-
-**Query Examples:**
+View your knowledge graph:
 ```cypher
 // View all nodes
-MATCH (n) RETURN n LIMIT 25
+MATCH (n) WHERE n.group_id = 'user_default' RETURN n LIMIT 25
 
-// View nodes with specific group_id
-MATCH (n) WHERE n.group_id = 'user_default' RETURN n LIMIT 50
-
-// Find episodes
-MATCH (e:Episodic) WHERE e.group_id = 'user_default' RETURN e
-
-// Find relationships
+// View relationships
 MATCH (a)-[r]->(b) WHERE a.group_id = 'user_default' RETURN a, r, b LIMIT 25
 ```
 
@@ -433,15 +234,13 @@ Contributions are welcome! Please:
 
 ## 📄 License
 
-[Your License Here]
+MIT
 
 ## 🙏 Acknowledgments
 
-- **OpenAI** - Realtime API & GPT-4o
+- **OpenAI** - Realtime API & GPT-5
 - **Graphiti** - Temporal knowledge graph framework
 - **Neo4j** - Graph database platform
 - **Zep AI** - Knowledge graph MCP server
 
 ---
-
-Built with ❤️ by [Your Name]

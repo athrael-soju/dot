@@ -134,10 +134,10 @@ export function useRealtimeSession(callbacks: RealtimeSessionCallbacks = {}) {
                         return pc;
                     },
                 }),
-                model: 'gpt-4o-realtime-preview-2025-06-03',
+                model: process.env.NEXT_PUBLIC_OPENAI_REALTIME_MODEL || 'gpt-realtime-mini',
                 config: {
                     inputAudioTranscription: {
-                        model: 'gpt-4o-mini-transcribe',
+                        model: process.env.NEXT_PUBLIC_OPENAI_TRANSCRIPTION_MODEL || 'gpt-4o-mini-transcribe',
                     },
                 },
                 outputGuardrails: outputGuardrails ?? [],
