@@ -74,13 +74,13 @@ export const searchNodesTool = {
     parameters: {
         type: 'object' as const,
         properties: {
-            query: { 
-                type: 'string', 
-                description: 'The search query to find relevant entities' 
+            query: {
+                type: 'string',
+                description: 'The search query to find relevant entities'
             },
-            group_id: { 
-                type: 'string', 
-                description: 'The user ID or group ID to search within' 
+            group_id: {
+                type: 'string',
+                description: 'The user ID or group ID to search within'
             },
             entity_types: {
                 type: 'array',
@@ -131,13 +131,13 @@ export const searchFactsTool = {
     parameters: {
         type: 'object' as const,
         properties: {
-            query: { 
-                type: 'string', 
-                description: 'The search query to find relevant facts' 
+            query: {
+                type: 'string',
+                description: 'The search query to find relevant facts'
             },
-            group_id: { 
-                type: 'string', 
-                description: 'The user ID or group ID to search within' 
+            group_id: {
+                type: 'string',
+                description: 'The user ID or group ID to search within'
             }
         },
         required: ['query', 'group_id'],
@@ -181,9 +181,9 @@ export const deleteEpisodeTool = {
     parameters: {
         type: 'object' as const,
         properties: {
-            uuid: { 
-                type: 'string', 
-                description: 'The UUID of the episode to delete' 
+            uuid: {
+                type: 'string',
+                description: 'The UUID of the episode to delete'
             }
         },
         required: ['uuid'],
@@ -224,9 +224,9 @@ export const deleteEntityEdgeTool = {
     parameters: {
         type: 'object' as const,
         properties: {
-            uuid: { 
-                type: 'string', 
-                description: 'The UUID of the entity edge to delete' 
+            uuid: {
+                type: 'string',
+                description: 'The UUID of the entity edge to delete'
             }
         },
         required: ['uuid'],
@@ -291,7 +291,7 @@ export const forgetAllTool = {
                 });
             }
 
-            // Directly delete the entire graph for this group using FalkorDB
+            // Directly delete the entire graph for this group using Neo4j
             // This is much more efficient than deleting episodes one by one
             try {
                 const response = await fetch('/api/memory/forget', {
@@ -329,13 +329,13 @@ export const getEpisodesTool = {
     parameters: {
         type: 'object' as const,
         properties: {
-            group_id: { 
-                type: 'string', 
-                description: 'The user ID or group ID to retrieve episodes for' 
+            group_id: {
+                type: 'string',
+                description: 'The user ID or group ID to retrieve episodes for'
             },
-            max_episodes: { 
-                type: 'number', 
-                description: 'Maximum number of episodes to return (default: 10)' 
+            max_episodes: {
+                type: 'number',
+                description: 'Maximum number of episodes to return (default: 10)'
             }
         },
         required: ['group_id'],

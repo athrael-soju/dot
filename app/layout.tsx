@@ -13,11 +13,11 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Eva - Your AI Companion",
-  description: "A warm, thoughtful AI companion with memory. Eva remembers your conversations and forms meaningful connections.",
+  title: "Plucky - Your AI Companion",
+  description: "A warm, thoughtful AI companion with memory. Plucky remembers your conversations and forms meaningful connections.",
   icons: {
-    icon: '/eva-icon-nobg.png',
-    apple: '/eva-icon-nobg.png',
+    icon: '/plucky-nobg.png',
+    apple: '/plucky-nobg.png',
   },
 };
 

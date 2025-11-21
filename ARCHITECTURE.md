@@ -1,4 +1,4 @@
-# Eva Architecture Documentation
+# Plucky Architecture Documentation
 
 ## Table of Contents
 1. [System Overview](#system-overview)
@@ -10,7 +10,7 @@
 
 ## System Overview
 
-Eva is built on a **hybrid architecture** that optimizes for both security and performance:
+Plucky is built on a **hybrid architecture** that optimizes for both security and performance:
 - **Client-side Realtime** - Direct browser-to-OpenAI connection for low-latency audio
 - **Server-side Memory** - Backend API layer protects graph database access
 
@@ -67,7 +67,7 @@ graph TD
     G --> I[TranscriptContext]
     G --> J[EventContext]
 
-    K[createChatAgent] --> L[Eva RealtimeAgent]
+    K[createChatAgent] --> L[Plucky RealtimeAgent]
     L --> M[Memory Tools]
     L --> N[Persona Instructions]
 
@@ -111,7 +111,7 @@ graph TD
 
 ```mermaid
 graph LR
-    A[Eva Agent] --> B{Tool Call}
+    A[Plucky Agent] --> B{Tool Call}
 
     B -->|Memory| C[add_episode]
     B -->|Search| D[search_nodes]
@@ -155,7 +155,7 @@ sequenceDiagram
     participant UI as React UI
     participant SS as Session Service
     participant OAI as OpenAI
-    participant Agent as Eva Agent
+    participant Agent as Plucky Agent
     participant API as API Routes
     participant MCP as MCP Client
     participant Graph as Graphiti
@@ -169,7 +169,7 @@ sequenceDiagram
     UI->>OAI: Connect WebSocket with token
     OAI-->>UI: Connection established
 
-    UI->>Agent: Initialize Eva
+    UI->>Agent: Initialize Plucky
     Agent->>Agent: Generate session ID
 
     Note over Agent,Graph: Startup Memory Loading
@@ -201,7 +201,7 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
     participant U as User
-    participant Agent as Eva
+    participant Agent as Plucky
     participant Browser as Browser
     participant API as API Route
     participant MCP as MCP Client
@@ -246,7 +246,7 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
     participant U as User
-    participant Agent as Eva
+    participant Agent as Plucky
     participant Browser as Browser
     participant API as API Route
     participant MCP as MCP Client

@@ -139,7 +139,7 @@ export class MCPClient {
           sampling: {},
         },
         clientInfo: {
-          name: 'eva-mcp-client',
+          name: 'plucky-mcp-client',
           version: '1.0.0',
         },
       },

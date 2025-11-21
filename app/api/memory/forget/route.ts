@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
 
         // Execute Cypher query to delete all nodes and relationships for this group in Neo4j
         const cypherQuery = `MATCH (n) WHERE n.group_id = '${group_id}' DETACH DELETE n`;
-        const command = `docker exec eva-neo4j-1 cypher-shell -u neo4j -p demodemo --format plain "MATCH (n) WHERE n.group_id = '${group_id}' DETACH DELETE n"`;
+        const command = `docker exec plucky-neo4j-1 cypher-shell -u neo4j -p demodemo --format plain "MATCH (n) WHERE n.group_id = '${group_id}' DETACH DELETE n"`;
         console.log('[API] Executing command:', command);
 
         const { stdout, stderr } = await execAsync(command);

@@ -1,8 +1,8 @@
 {
-  "name": "eva-ai-companion",
+  "name": "plucky-ai-companion",
   "version": "0.1.0",
   "private": true,
-  "description": "Eva - A warm, thoughtful AI companion with persistent memory, featuring real-time voice conversations and knowledge graph-based memory system",
+  "description": "Plucky - A warm, thoughtful AI companion with persistent memory, featuring real-time voice conversations and knowledge graph-based memory system",
   "keywords": [
     "ai",
     "ai-companion",
@@ -36,7 +36,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/athrael-soju/eva"
+    "url": "https://github.com/athrael-soju/plucky"
   },
   "author": "athrael-soju",
   "scripts": {

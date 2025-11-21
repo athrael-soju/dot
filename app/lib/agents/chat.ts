@@ -129,7 +129,7 @@ After completing these checks, greet the user naturally with awareness of your s
 `.trim();
 
     return new RealtimeAgent({
-        name: 'Eva',
+        name: 'Plucky',
         voice: 'marin',
         instructions: sessionInstructions,
         tools: [

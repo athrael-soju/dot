@@ -1,10 +1,10 @@
-# Eva - Your Personalized AI Companion
+# Plucky - Your Personalized AI Companion
 
 <div align="center">
-  <img src="public/eva-avatar.png" alt="Eva Avatar" width="85%" height="85%" />
+  <img src="public/plucky.png" alt="Plucky Avatar" width="85%" height="85%" />
 </div>
 
-Eva is a warm, intelligent AI companion with **episodic memory** powered by a knowledge graph. She remembers your conversations, preferences, and personal details across sessions, creating natural, context-aware interactions through real-time voice conversations.
+Plucky is a warm, intelligent AI companion with **episodic memory** powered by a knowledge graph. She remembers your conversations, preferences, and personal details across sessions, creating natural, context-aware interactions through real-time voice conversations.
 
 ## 🌟 Key Features
 
@@ -57,15 +57,15 @@ graph TB
 ```mermaid
 sequenceDiagram
     participant User
-    participant Eva (Agent)
+    participant Plucky (Agent)
     participant Browser
     participant API Routes
     participant MCP Client
     participant Graphiti
     participant Neo4j
 
-    Note over Eva,Neo4j: Startup: Load Context
-    Eva->>Browser: Call get_episodes tool
+    Note over Plucky,Neo4j: Startup: Load Context
+    Plucky->>Browser: Call get_episodes tool
     Browser->>API Routes: POST /api/memory/get-episodes
     API Routes->>MCP Client: callTool('get_episodes')
     MCP Client->>Graphiti: JSON-RPC: get_episodes
@@ -74,9 +74,9 @@ sequenceDiagram
     Graphiti-->>MCP Client: Episodes JSON
     MCP Client-->>API Routes: Result
     API Routes-->>Browser: Episodes
-    Browser-->>Eva: Tool result (recent history)
+    Browser-->>Plucky: Tool result (recent history)
 
-    Eva->>Browser: Call search_nodes tool
+    Plucky->>Browser: Call search_nodes tool
     Browser->>API Routes: POST /api/memory/search-nodes
     API Routes->>MCP Client: callTool('search_nodes')
     MCP Client->>Graphiti: JSON-RPC: search_nodes
@@ -85,11 +85,11 @@ sequenceDiagram
     Graphiti-->>MCP Client: Entities JSON
     MCP Client-->>API Routes: Result
     API Routes-->>Browser: Entities
-    Browser-->>Eva: Tool result (user profile)
+    Browser-->>Plucky: Tool result (user profile)
 
-    Note over User,Eva: Conversation
-    User->>Eva: "Hi, I'm Bob"
-    Eva->>Browser: Call add_episode tool
+    Note over User,Plucky: Conversation
+    User->>Plucky: "Hi, I'm Bob"
+    Plucky->>Browser: Call add_episode tool
     Browser->>API Routes: POST /api/memory/add-episode
     API Routes->>MCP Client: callTool('add_memory')
     MCP Client->>Graphiti: JSON-RPC: add_memory
@@ -98,19 +98,19 @@ sequenceDiagram
     Graphiti-->>MCP Client: Episode UUID
     MCP Client-->>API Routes: Result
     API Routes-->>Browser: Success
-    Browser-->>Eva: Memory saved
-    Eva->>User: "Nice to meet you, Bob!"
+    Browser-->>Plucky: Memory saved
+    Plucky->>User: "Nice to meet you, Bob!"
 
-    Note over User,Eva: Future Session
-    User->>Eva: "What's my name?"
-    Eva->>Browser: Call search_nodes tool
+    Note over User,Plucky: Future Session
+    User->>Plucky: "What's my name?"
+    Plucky->>Browser: Call search_nodes tool
     Browser->>API Routes: POST /api/memory/search-nodes
     API Routes->>MCP Client: callTool('search_nodes')
     MCP Client->>Graphiti: query="user name"
     Graphiti->>Neo4j: Vector search
     Neo4j-->>Graphiti: Bob entity
-    Graphiti-->>Eva: "Bob" found
-    Eva->>User: "Your name is Bob"
+    Graphiti-->>Plucky: "Bob" found
+    Plucky->>User: "Your name is Bob"
 ```
 
 ## 🛠️ Technology Stack
@@ -135,7 +135,7 @@ sequenceDiagram
 ## 📁 Project Structure
 
 ```
-Eva/
+Plucky/
 ├── app/
 │   ├── api/                      # Backend API routes
 │   │   ├── memory/              # Memory operation endpoints
@@ -149,7 +149,7 @@ Eva/
 │   │   └── session/             # OpenAI session tokens
 │   ├── lib/
 │   │   ├── agents/
-│   │   │   ├── chat.ts          # Main Eva agent configuration
+│   │   │   ├── chat.ts          # Main Plucky agent configuration
 │   │   │   ├── persona.ts       # Personality & behavior instructions
 │   │   │   ├── executor.ts      # Memory tool definitions
 │   │   │   └── tools/           # Additional agent tools
@@ -174,8 +174,8 @@ Eva/
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/athrael-soju/Eva.git
-   cd eva
+   git clone https://github.com/athrael-soju/Plucky.git
+   cd plucky
    ```
 
 2. **Install dependencies**
@@ -194,7 +194,7 @@ Eva/
 
 4. **Start Graphiti & Neo4j**
    ```bash
-   docker-compose up -d
+   docker compose up -d
    ```
 
 5. **Start the development server**
@@ -202,7 +202,7 @@ Eva/
    npm run dev
    ```
 
-6. **Open Eva**
+6. **Open Plucky**
 
    Navigate to [http://localhost:3000](http://localhost:3000)
 
@@ -212,19 +212,19 @@ Eva/
 
 1. **Connect** - Click the loading animation or press the connect button
 2. **Allow microphone access** when prompted
-3. **Wait for Eva to greet you** - She'll retrieve her memories about you first
-4. **Start talking** - Speak naturally, Eva will respond in real-time
+3. **Wait for Plucky to greet you** - She'll retrieve her memories about you first
+4. **Start talking** - Speak naturally, Plucky will respond in real-time
 
 ### Memory Features
 
-Eva automatically remembers:
+Plucky automatically remembers:
 - ✅ **Personal details** - Your name, role, location, organization
 - ✅ **Preferences** - Likes, dislikes, opinions
 - ✅ **Topics of interest** - What you care about
 - ✅ **Past events** - Important moments from conversations
 - ✅ **Goals & requirements** - Your objectives and commitments
 
-### Asking Eva to Remember
+### Asking Plucky to Remember
 
 ```
 "What do you know about me?"
@@ -240,7 +240,7 @@ Eva automatically remembers:
 "Forget everything"
 "Clear all memories"
 ```
-Eva will ask for confirmation before permanently deleting all memories.
+Plucky will ask for confirmation before permanently deleting all memories.
 
 ### Debug Mode
 
@@ -320,7 +320,7 @@ Entities & Facts
 
 ## 🎨 Agent Personality
 
-Eva is designed to be:
+Plucky is designed to be:
 - **Warm & Authentic** - Genuinely caring, not artificially cheerful
 - **Curious** - Shows real interest in your thoughts and experiences
 - **Insightful** - Offers fresh perspectives when helpful
@@ -334,8 +334,8 @@ Eva is designed to be:
 - "According to my records, we discussed this last week"
 
 **✅ Natural (Goal):**
-- User: "I'm stressed" → Eva: "Is it the project deadline you mentioned?"
-- Eva greets: "Hey! How did that presentation go?"
+- User: "I'm stressed" → Plucky: "Is it the project deadline you mentioned?"
+- Plucky greets: "Hey! How did that presentation go?"
 
 ## 🛠️ Development
 
@@ -383,10 +383,10 @@ export const myNewTool = {
 docker ps | grep graphiti
 
 # View Graphiti logs
-docker logs eva-graphiti-1
+docker logs plucky-graphiti-mcp-1
 
 # Restart services
-docker-compose restart
+docker compose restart
 ```
 
 ### Memory Not Persisting
