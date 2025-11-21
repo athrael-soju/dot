@@ -28,6 +28,7 @@ export function useRealtimeSession(callbacks: RealtimeSessionCallbacks = {}) {
     const [status, setStatus] = useState<
         SessionStatus
     >('DISCONNECTED');
+    const [sessionVersion, setSessionVersion] = useState(0);
     const { logClientEvent } = useEvent();
 
     const updateStatus = useCallback(
@@ -88,27 +89,39 @@ export function useRealtimeSession(callbacks: RealtimeSessionCallbacks = {}) {
     };
 
     useEffect(() => {
-        if (sessionRef.current) {
-            // Log server errors
-            sessionRef.current.on("error", (...args: any[]) => {
-                logServerEvent({
-                    type: "error",
-                    message: args[0],
-                });
+        const session = sessionRef.current;
+        if (!session) return;
+
+        // Error handler
+        const errorHandler = (...args: any[]) => {
+            logServerEvent({
+                type: "error",
+                message: args[0],
             });
+        };
 
-            // history events
-            sessionRef.current.on("agent_handoff", handleAgentHandoff);
-            sessionRef.current.on("agent_tool_start", historyHandlers.handleAgentToolStart);
-            sessionRef.current.on("agent_tool_end", historyHandlers.handleAgentToolEnd);
-            sessionRef.current.on("history_updated", historyHandlers.handleHistoryUpdated);
-            sessionRef.current.on("history_added", historyHandlers.handleHistoryAdded);
-            sessionRef.current.on("guardrail_tripped", historyHandlers.handleGuardrailTripped);
+        // Attach event listeners
+        session.on("error", errorHandler);
+        session.on("agent_handoff", handleAgentHandoff);
+        session.on("agent_tool_start", historyHandlers.handleAgentToolStart);
+        session.on("agent_tool_end", historyHandlers.handleAgentToolEnd);
+        session.on("history_updated", historyHandlers.handleHistoryUpdated);
+        session.on("history_added", historyHandlers.handleHistoryAdded);
+        session.on("guardrail_tripped", historyHandlers.handleGuardrailTripped);
+        session.on("transport_event", handleTransportEvent);
 
-            // additional transport events
-            sessionRef.current.on("transport_event", handleTransportEvent);
-        }
-    }, [sessionRef.current]);
+        // Cleanup: remove event listeners when session changes or component unmounts
+        return () => {
+            session.off("error", errorHandler);
+            session.off("agent_handoff", handleAgentHandoff);
+            session.off("agent_tool_start", historyHandlers.handleAgentToolStart);
+            session.off("agent_tool_end", historyHandlers.handleAgentToolEnd);
+            session.off("history_updated", historyHandlers.handleHistoryUpdated);
+            session.off("history_added", historyHandlers.handleHistoryAdded);
+            session.off("guardrail_tripped", historyHandlers.handleGuardrailTripped);
+            session.off("transport_event", handleTransportEvent);
+        };
+    }, [sessionVersion, logServerEvent, historyHandlers.handleAgentToolStart, historyHandlers.handleAgentToolEnd, historyHandlers.handleHistoryUpdated, historyHandlers.handleHistoryAdded, historyHandlers.handleGuardrailTripped]);
 
     const connect = useCallback(
         async ({
@@ -145,6 +158,7 @@ export function useRealtimeSession(callbacks: RealtimeSessionCallbacks = {}) {
             });
 
             await sessionRef.current.connect({ apiKey: ek });
+            setSessionVersion(v => v + 1); // Trigger event handler setup
             updateStatus('CONNECTED');
         },
         [callbacks, updateStatus],

@@ -33,11 +33,15 @@ export const createAddEpisodeTool = (sessionId: string) => ({
         additionalProperties: false
     },
     invoke: async (_context: any, input: string) => {
+        // Create AbortController to handle disconnection during fetch
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 30000); // 30s timeout
+
         try {
             const args = JSON.parse(input);
             console.log('Executing add_episode:', args);
 
-            // Call server-side API route
+            // Call server-side API route with abort signal
             const response = await fetch('/api/memory/add-episode', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -48,9 +52,11 @@ export const createAddEpisodeTool = (sessionId: string) => ({
                     source_description: args.source_description,
                     group_id: args.group_id,
                     session_id: sessionId
-                })
+                }),
+                signal: controller.signal
             });
 
+            clearTimeout(timeout);
             const result = await response.json();
 
             if (!response.ok) {
@@ -59,6 +65,14 @@ export const createAddEpisodeTool = (sessionId: string) => ({
 
             return JSON.stringify(result);
         } catch (error: any) {
+            clearTimeout(timeout);
+
+            // Handle abort gracefully
+            if (error.name === 'AbortError') {
+                console.error('add_episode request aborted');
+                return JSON.stringify({ error: 'Request cancelled or timed out' });
+            }
+
             console.error('Error in add_episode tool:', error);
             return JSON.stringify({ error: error.message });
         }
@@ -93,11 +107,16 @@ export const searchNodesTool = {
     },
     invoke: async (_context: any, input: string) => {
         console.log('Tool invoked: search_nodes with input:', input);
+
+        // Create AbortController to handle disconnection during fetch
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 30000); // 30s timeout
+
         try {
             const args = JSON.parse(input);
             console.log('Executing search_nodes:', args);
 
-            // Call server-side API route
+            // Call server-side API route with abort signal
             const response = await fetch('/api/memory/search-nodes', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -105,9 +124,11 @@ export const searchNodesTool = {
                     query: args.query,
                     group_id: args.group_id,
                     entity_types: args.entity_types
-                })
+                }),
+                signal: controller.signal
             });
 
+            clearTimeout(timeout);
             const result = await response.json();
 
             if (!response.ok) {
@@ -116,6 +137,14 @@ export const searchNodesTool = {
 
             return JSON.stringify(result);
         } catch (error: any) {
+            clearTimeout(timeout);
+
+            // Handle abort gracefully
+            if (error.name === 'AbortError') {
+                console.error('search_nodes request aborted');
+                return JSON.stringify({ error: 'Request cancelled or timed out' });
+            }
+
             console.error('Error in search_nodes tool:', error);
             return JSON.stringify({ error: error.message });
         }
@@ -144,20 +173,26 @@ export const searchFactsTool = {
         additionalProperties: false
     },
     invoke: async (_context: any, input: string) => {
+        // Create AbortController to handle disconnection during fetch
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 30000); // 30s timeout
+
         try {
             const args = JSON.parse(input);
             console.log('Executing search_facts:', args);
 
-            // Call server-side API route
+            // Call server-side API route with abort signal
             const response = await fetch('/api/memory/search-facts', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     query: args.query,
                     group_id: args.group_id
-                })
+                }),
+                signal: controller.signal
             });
 
+            clearTimeout(timeout);
             const result = await response.json();
 
             if (!response.ok) {
@@ -166,6 +201,14 @@ export const searchFactsTool = {
 
             return JSON.stringify(result);
         } catch (error: any) {
+            clearTimeout(timeout);
+
+            // Handle abort gracefully
+            if (error.name === 'AbortError') {
+                console.error('search_facts request aborted');
+                return JSON.stringify({ error: 'Request cancelled or timed out' });
+            }
+
             console.error('Error in search_facts tool:', error);
             return JSON.stringify({ error: error.message });
         }
@@ -190,17 +233,23 @@ export const deleteEpisodeTool = {
         additionalProperties: false
     },
     invoke: async (_context: any, input: string) => {
+        // Create AbortController to handle disconnection during fetch
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 30000); // 30s timeout
+
         try {
             const args = JSON.parse(input);
             console.log('Executing delete_episode:', args);
 
-            // Call server-side API route
+            // Call server-side API route with abort signal
             const response = await fetch('/api/memory/delete-episode', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ uuid: args.uuid })
+                body: JSON.stringify({ uuid: args.uuid }),
+                signal: controller.signal
             });
 
+            clearTimeout(timeout);
             const result = await response.json();
 
             if (!response.ok) {
@@ -209,6 +258,14 @@ export const deleteEpisodeTool = {
 
             return JSON.stringify(result);
         } catch (error: any) {
+            clearTimeout(timeout);
+
+            // Handle abort gracefully
+            if (error.name === 'AbortError') {
+                console.error('delete_episode request aborted');
+                return JSON.stringify({ error: 'Request cancelled or timed out' });
+            }
+
             console.error('Error in delete_episode tool:', error);
             return JSON.stringify({ error: error.message });
         }
@@ -233,17 +290,23 @@ export const deleteEntityEdgeTool = {
         additionalProperties: false
     },
     invoke: async (_context: any, input: string) => {
+        // Create AbortController to handle disconnection during fetch
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 30000); // 30s timeout
+
         try {
             const args = JSON.parse(input);
             console.log('Executing delete_entity_edge:', args);
 
-            // Call server-side API route
+            // Call server-side API route with abort signal
             const response = await fetch('/api/memory/delete-entity-edge', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ uuid: args.uuid })
+                body: JSON.stringify({ uuid: args.uuid }),
+                signal: controller.signal
             });
 
+            clearTimeout(timeout);
             const result = await response.json();
 
             if (!response.ok) {
@@ -252,6 +315,14 @@ export const deleteEntityEdgeTool = {
 
             return JSON.stringify(result);
         } catch (error: any) {
+            clearTimeout(timeout);
+
+            // Handle abort gracefully
+            if (error.name === 'AbortError') {
+                console.error('delete_entity_edge request aborted');
+                return JSON.stringify({ error: 'Request cancelled or timed out' });
+            }
+
             console.error('Error in delete_entity_edge tool:', error);
             return JSON.stringify({ error: error.message });
         }
@@ -293,13 +364,18 @@ export const forgetAllTool = {
 
             // Directly delete the entire graph for this group using FalkorDB
             // This is much more efficient than deleting episodes one by one
+            const controller = new AbortController();
+            const timeout = setTimeout(() => controller.abort(), 30000); // 30s timeout
+
             try {
                 const response = await fetch('/api/memory/forget', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ group_id: args.group_id })
+                    body: JSON.stringify({ group_id: args.group_id }),
+                    signal: controller.signal
                 });
 
+                clearTimeout(timeout);
                 const result = await response.json();
 
                 if (!response.ok) {
@@ -310,6 +386,14 @@ export const forgetAllTool = {
                 console.log('Successfully deleted entire graph for group:', args.group_id);
                 return JSON.stringify(result);
             } catch (deleteError: any) {
+                clearTimeout(timeout);
+
+                // Handle abort gracefully
+                if (deleteError.name === 'AbortError') {
+                    console.error('forget_all request aborted');
+                    throw new Error('Request cancelled or timed out');
+                }
+
                 console.error('Error during graph deletion:', deleteError);
                 throw new Error(`Failed to clear memories: ${deleteError.message}`);
             }
@@ -343,20 +427,27 @@ export const getEpisodesTool = {
     },
     invoke: async (_context: any, input: string) => {
         console.log('Tool invoked: get_episodes with input:', input);
+
+        // Create AbortController to handle disconnection during fetch
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 30000); // 30s timeout
+
         try {
             const args = JSON.parse(input);
             console.log('Executing get_episodes:', args);
 
-            // Call server-side API route
+            // Call server-side API route with abort signal
             const response = await fetch('/api/memory/get-episodes', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     group_id: args.group_id,
                     max_episodes: args.max_episodes
-                })
+                }),
+                signal: controller.signal
             });
 
+            clearTimeout(timeout);
             const result = await response.json();
 
             if (!response.ok) {
@@ -365,6 +456,14 @@ export const getEpisodesTool = {
 
             return JSON.stringify(result);
         } catch (error: any) {
+            clearTimeout(timeout);
+
+            // Handle abort gracefully
+            if (error.name === 'AbortError') {
+                console.error('get_episodes request aborted');
+                return JSON.stringify({ error: 'Request cancelled or timed out' });
+            }
+
             console.error('Error in get_episodes tool:', error);
             return JSON.stringify({ error: error.message });
         }

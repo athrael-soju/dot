@@ -30,6 +30,7 @@ export const useLoadingAnimation = ({
     const animateStepRef = useRef(0);
     const isReversingRef = useRef(false);
     const idleAnimationTimeRef = useRef(0);
+    const isMountedRef = useRef(true);
 
     // Update ref when isAgentConnected changes
     useEffect(() => {
@@ -57,6 +58,9 @@ export const useLoadingAnimation = ({
     useEffect(() => {
         const currentContainer = containerRef.current;
         if (!currentContainer) return;
+
+        // Mark component as mounted
+        isMountedRef.current = true;
 
         const areawidth = window.innerWidth;
         const areaheight = window.innerHeight;
@@ -144,6 +148,11 @@ export const useLoadingAnimation = ({
 
         // Animation loop
         const animate = () => {
+            // Stop animation if component is unmounted
+            if (!isMountedRef.current) {
+                return;
+            }
+
             mesh.rotation.x += rotatevalue + acceleration;
             render();
             animationFrameRef.current = requestAnimationFrame(animate);
@@ -166,9 +175,15 @@ export const useLoadingAnimation = ({
 
         // Cleanup
         return () => {
+            // Mark component as unmounted to stop animation loop
+            isMountedRef.current = false;
+
+            // Cancel any pending animation frame
             if (animationFrameRef.current) {
                 cancelAnimationFrame(animationFrameRef.current);
             }
+
+            // Clean up event listeners and Three.js resources
             window.removeEventListener('resize', handleResize);
             disposeInteractions();
             disposeScene();
